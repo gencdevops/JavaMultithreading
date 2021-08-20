@@ -12,7 +12,29 @@ import java.util.Random;
 public class RandomGeneratorApp {
     private RandomGeneratorApp() {
     }
+    private static void doWorkForFile(Path path, int count, int min, int max) {
+        Random r = new Random();
+        try (BufferedWriter br = Files.newBufferedWriter(path,
+                StandardCharsets.UTF_8, StandardOpenOption.APPEND,
+                StandardOpenOption.CREATE)) {
 
+            for (int k = 0; k < count; ++k) {
+                br.write((r.nextInt(max - min) + min) + "\r\n");
+                br.flush();
+            }
+
+
+        } catch (IOException ex) {
+            System.err.println("IO problem");
+        }
+    }
+
+    private static void runnableCallback(int count, int min, int max, String filePrefix, int suffix) {
+
+        Thread self = Thread.currentThread();
+        String fullName = String.format("%s_%s_%s", filePrefix, self.getName(), suffix);
+        doWorkForFile(Path.of(fullName) , count, min, max);
+    }
     private static void doGenerate(String[] args) {
         try {
 
@@ -24,25 +46,7 @@ public class RandomGeneratorApp {
 
             for (int i = 0; i < numberOfFiles; i++) {
                 int suffix = i + 1;
-                new Thread(() -> {
-                    Random r = new Random();
-                    Thread self = Thread.currentThread();
-                    String fullName = String.format("%s_%s_%s", filePrefix, self.getName(), suffix);
-                    try (BufferedWriter br = Files.newBufferedWriter(Path.of(fullName),
-                            StandardCharsets.UTF_8, StandardOpenOption.APPEND,
-                            StandardOpenOption.CREATE)) {
-
-                        for (int k = 0; k < count; ++k) {
-                            br.write((r.nextInt(max - min) + min) + "\r\n");
-                            br.flush();
-                        }
-
-
-                    } catch (IOException ex) {
-                        System.err.println("IO problem");
-                    }
-
-                }).start();
+                new Thread(() -> runnableCallback(count,min,max,filePrefix,suffix)).start();
             }
 
 
@@ -60,7 +64,6 @@ public class RandomGeneratorApp {
         }
 
         doGenerate(args);
-
     }
 
     public static void main(String[] args) {
