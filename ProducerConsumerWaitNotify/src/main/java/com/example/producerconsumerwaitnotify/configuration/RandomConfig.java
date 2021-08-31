@@ -12,7 +12,7 @@ public class RandomConfig {
 
     @Bean
     @Scope("prototype")
-    public Random randomConfig() {
+    public Random createRandom() {
         return new Random();
     }
 

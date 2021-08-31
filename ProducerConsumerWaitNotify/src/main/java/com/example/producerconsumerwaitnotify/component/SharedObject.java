@@ -20,7 +20,7 @@ public class SharedObject {
         this.notify();
     }
 
-    public synchronized int gelVal() throws InterruptedException {
+    public synchronized int getVal() throws InterruptedException {
         while (produce) {
             this.wait();
         }
